@@ -5,6 +5,7 @@ import {bufferTime, map, throttle} from "rxjs/operators";
 import {interval} from "rxjs/internal/observable/interval";
 import {ChartDataSets, ChartOptions} from "chart.js";
 import {Color, Label} from "ng2-charts";
+import {merge} from "rxjs/internal/observable/merge";
 
 @Component({
     selector: 'app-root',
@@ -42,10 +43,19 @@ export class AppComponent {
     }
 
     ngOnInit() {
-        this.socket.fromEvent('premMessage')
-            .subscribe((msg:string) => this.lastMessage = msg)
-
+        const premObservable = this.socket.fromEvent('premMessage')
         const stdObservable = this.socket.fromEvent('stdMessage')
+
+        const commObservable = merge(premObservable, stdObservable)
+
+        premObservable
+            .pipe(
+                map (ev => { return {type: 'text', text: ev, avatar: 'https://data.whicdn.com/images/54647343/original.jpg'}} )
+            )
+            .subscribe(msg => {
+                if (this.messages.length >=6) this.messages.shift();
+                this.messages.push(msg)
+            })
 
         const stdObserver1 = stdObservable
             .pipe(
@@ -57,7 +67,7 @@ export class AppComponent {
                 this.messages.push(msg)
             })
 
-        const stdObserver2 = stdObservable
+        const stdObservcommObservableer2 = commObservable
             .pipe(
                 bufferTime(1000)
             )

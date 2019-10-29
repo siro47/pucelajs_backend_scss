@@ -336,13 +336,6 @@
 
     <div class="content" role="main">
 
-        <nb-chat title="Nebular Conversational UI">
-            <nb-chat-message *ngFor="let msg of messages"
-                             [type]="msg.type"
-                             [message]="msg.text">
-            </nb-chat-message>
-        </nb-chat>
-
         <div class="canvas-content">
             <canvas baseChart width="1000" height="400"
                     [datasets]="lineChartData"
@@ -354,6 +347,16 @@
                     [plugins]="lineChartPlugins">
             </canvas>
         </div>
+        
+        <nb-chat title="Nebular Conversational UI">
+            <nb-chat-message *ngFor="let msg of messages"
+                             [type]="msg.type"
+                             [message]="msg.text"
+                             [avatar]="msg.avatar">
+            </nb-chat-message>
+        </nb-chat>
+
+
 
     </div>
 
