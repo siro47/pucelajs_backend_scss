@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import {Socket} from "ngx-socket-io";
 
-import {bufferTime, throttle} from "rxjs/operators";
+import {bufferTime, map, throttle} from "rxjs/operators";
 import {interval} from "rxjs/internal/observable/interval";
 import {ChartDataSets, ChartOptions} from "chart.js";
 import {Color, Label} from "ng2-charts";
@@ -15,6 +15,8 @@ export class AppComponent {
     lastMessage = 'Ready to receive...';
     messageCounter = 0;
 
+    messages= [];
+
     public data:number[] = []
     public lineChartData: ChartDataSets[] = [
         { data: [], label: 'Messages' },
@@ -26,7 +28,7 @@ export class AppComponent {
     public lineChartColors: Color[] = [
         {
             borderColor: 'black',
-            backgroundColor: 'rgba(110,132,173,1)',
+            backgroundColor: 'rgba(132,110,173,1)',
         },
     ];
     public lineChartLegend = true;
@@ -47,9 +49,13 @@ export class AppComponent {
 
         const stdObserver1 = stdObservable
             .pipe(
-                throttle(ev => interval(500))
+                map (ev => { return {type: 'text', text: ev}} ),
+                throttle(ev => interval(500)),
             )
-            .subscribe((msg:string) => this.lastMessage = msg)
+            .subscribe(msg => {
+                if (this.messages.length >=6) this.messages.shift();
+                this.messages.push(msg)
+            })
 
         const stdObserver2 = stdObservable
             .pipe(
